@@ -2,7 +2,7 @@
   <main class="main">
     <div class="container nav-padding">
       <div class="row mb-3 justify-content-end">
-        <div class="col-4">
+        <div class="col-12 col-lg-4 mb-3 mb-lg-0">
           <h4>單字頁數:</h4>
           <select
             class="form-select"
@@ -19,7 +19,7 @@
             </option>
           </select>
         </div>
-        <div class="col-4">
+        <div class="col-12 col-lg-4">
           <h4>檢視模式:</h4>
           <select class="form-select" aria-label="wordMode" v-model="mode">
             <option :value="MODE_TYPE.TABLE">TABLE</option>
@@ -51,7 +51,7 @@
         <li
           v-for="(word, wordIndex) in currentWords"
           :key="wordIndex"
-          class="col-3"
+          class="col-12 col-sm-6 col-lg-3"
         >
           <div
             class="cus-card card bg-dark border-light mb-4 text-light overflow-hidden"
@@ -111,7 +111,7 @@ function init() {
 
 function updatePage() {
   const startIndex = (page.value - 1) * 100;
-  const endIndex = page.value * 100 + 1;
+  const endIndex = page.value * 100;
 
   currentWords.value = filterWords.value
     .filter((_, index) => index >= startIndex && index < endIndex)
