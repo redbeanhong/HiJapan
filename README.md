@@ -1,7 +1,7 @@
 # HiJapan
 
 ## DEMO
-https://redbeanhong.github.io/HiJapan/#/
+https://redbeanhong.github.io/HiJapan/
 
 ## Libraries use in this project
 
