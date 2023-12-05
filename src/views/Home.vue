@@ -1,5 +1,13 @@
 <template>
   <main class="main">
+    <div v-if="isSpeakerLoading" class="loading">
+      <span
+        class="spinner-border spinner-border"
+        role="status"
+        aria-hidden="true"
+      ></span>
+      <span class="text-light ms-3">Loading...</span>
+    </div>
     <div class="container nav-padding">
       <div class="row mb-3 justify-content-end">
         <div class="col-12 col-lg-4 mb-3 mb-lg-0">
@@ -100,6 +108,10 @@ let page = ref(1); // init page
 let filterWords = ref([]); // 12 page
 let currentWords = ref([]); // 100 row
 
+let voices = [];
+let utterance = new SpeechSynthesisUtterance();
+let speaker = null;
+let isSpeakerLoading = ref(true);
 onMounted(() => {
   init();
 });
@@ -107,8 +119,47 @@ onMounted(() => {
 function init() {
   filterWords.value = words.filter((e) => e.text != ""); // 可能還要另外看 == ""的
   updatePage();
+  initSpeaker();
 }
 
+async function initSpeaker() {
+  if ("speechSynthesis" in window) {
+    speaker = window.speechSynthesis;
+    voices = await getVoices();
+    voices = voices.find((voice) => voice.voiceURI === "Google 日本語");
+
+    if (voices == null) {
+      utterance.voice = speechSynthesis.getVoices();
+    } else {
+      utterance.voice = voices;
+    }
+
+    // 設定語言為日文
+    utterance.lang = "ja-JP";
+
+    // 設定速度為較慢，可調整這個值
+    utterance.rate = 0.8;
+
+    // 設定音量為較大，可調整這個值
+    utterance.volume = 1;
+    setTimeout(() => {
+      isSpeakerLoading.value = false;
+    }, 500);
+  }
+}
+async function getVoices() {
+  return new Promise((resolve, reject) => {
+    const voices = speechSynthesis.getVoices();
+    if (voices.length > 0) {
+      resolve(voices);
+    } else {
+      speechSynthesis.onvoiceschanged = () => {
+        const updatedVoices = speechSynthesis.getVoices();
+        resolve(updatedVoices);
+      };
+    }
+  });
+}
 function updatePage() {
   const startIndex = (page.value - 1) * 100;
   const endIndex = page.value * 100;
@@ -124,25 +175,8 @@ function updatePage() {
 function speakWord(wordToSpeak) {
   // 使用 Web Speech API
   if ("speechSynthesis" in window) {
-    var synthesis = window.speechSynthesis;
-    var utterance = new SpeechSynthesisUtterance(wordToSpeak);
-
-    // 設定語言為日文
-    utterance.lang = "ja-JP";
-
-    // 設定速度為較慢，可調整這個值
-    utterance.rate = 1;
-    utterance.voice = speechSynthesis
-      .getVoices()
-      .find((voice) => voice.voiceURI === "Google 日本語");
-
-    if (!utterance.voice) {
-      utterance.voice = speechSynthesis;
-    }
-
-    // 設定音量為較大，可調整這個值
-    utterance.volume = 1;
-    synthesis.speak(utterance);
+    utterance.text = wordToSpeak;
+    speaker.speak(utterance);
   } else {
     alert("抱歉，您的瀏覽器不支援語音合成功能。");
   }
