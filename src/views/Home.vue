@@ -62,33 +62,27 @@
           class="col-12 col-sm-6 col-lg-3"
         >
           <div
-            class="cus-card card bg-dark border-light mb-4 text-light overflow-hidden"
+            class="cus-card bg-dark mb-4 text-light"
+            @click="word.isShow = !word.isShow"
+            :class="{ flipped: word.isShow }"
           >
-            <div class="card-header border-bottom border-light">
+            <div
+              class="cus-card-content card-front p-4 border border-light border-1 rounded"
+            >
               <h2>
                 {{ wordIndex + 1 }}.{{ word.spell }}
-                <a href="#" @click.prevent="speakWord(word.text)"
+                <a href="#" @click.stop.prevent="speakWord(word.text)"
                   ><i class="fa fa-volume-up" aria-hidden="true"></i
                 ></a>
               </h2>
             </div>
-            <div class="card-body position-relative">
-              <div>
-                <h5 class="card-title">{{ word.text }}</h5>
-                <p class="card-text">
-                  {{ word.mean }}
-                </p>
-              </div>
-
-              <div class="answer-mask" v-if="!word.isShow">
-                <button
-                  type="button"
-                  class="btn btn-primary"
-                  @click="word.isShow = true"
-                >
-                  看答案
-                </button>
-              </div>
+            <div
+              class="cus-card-content card-back p-4 border border-light border-1 rounded"
+            >
+              <h5 class="card-title mb-4">{{ word.text }}</h5>
+              <p class="card-text">
+                {{ word.mean }}
+              </p>
             </div>
           </div>
         </li>
