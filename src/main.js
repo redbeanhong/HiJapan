@@ -8,7 +8,7 @@ import Home from "./views/Home.vue";
 const routes = [{ path: "/", component: Home }];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/HiJapan/'),
   routes,
 });
 

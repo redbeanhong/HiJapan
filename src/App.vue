@@ -6,11 +6,11 @@
       <div class="container-fluid ps-5 pe-5">
         <router-link class="navbar-brand d-flex align-items-center" to="/">
           <img
-            src="./assets/image/logo.jpg"
+            src="./assets/image/logo.png"
             alt=""
             width="35"
             height="35"
-            class="d-inline-block align-text-top border border-4 border-light"
+            class="d-inline-block align-text-top"
           />
         </router-link>
         <ul class="navbar-nav flex-row">
