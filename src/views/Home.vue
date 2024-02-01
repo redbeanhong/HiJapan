@@ -30,8 +30,8 @@
         <div class="col-12 col-lg-4">
           <h4>檢視模式:</h4>
           <select class="form-select" aria-label="wordMode" v-model="mode">
-            <option :value="MODE_TYPE.TABLE">TABLE</option>
-            <option :value="MODE_TYPE.CARD">CARD</option>
+            <option :value="MODE_TYPE.TABLE">表格</option>
+            <option :value="MODE_TYPE.CARD">單字卡</option>
           </select>
         </div>
       </div>
@@ -71,7 +71,10 @@
             >
               <h2>
                 {{ wordIndex + 1 }}.{{ word.spell }}
-                <a href="#" @click.stop.prevent="speakWord(word.text)"
+                <a
+                  href="#"
+                  @click.stop.prevent="speakWord(word.text)"
+                  v-if="hasVoice"
                   ><i class="fa fa-volume-up" aria-hidden="true"></i
                 ></a>
               </h2>
@@ -106,6 +109,7 @@ let voices = [];
 let utterance = new SpeechSynthesisUtterance();
 let speaker = null;
 let isSpeakerLoading = ref(true);
+let hasVoice = ref(false);
 onMounted(() => {
   init();
 });
@@ -117,25 +121,31 @@ function init() {
 }
 
 async function initSpeaker() {
-  if ("speechSynthesis" in window) {
-    speaker = window.speechSynthesis;
-    voices = await getVoices();
-    voices = voices.find((voice) => voice.voiceURI === "Google 日本語");
+  try {
+    if ("speechSynthesis" in window) {
+      speaker = window.speechSynthesis;
+      voices = await getVoices();
+      let voiceIndex = voices.findIndex(
+        (voice) => voice.voiceURI === "Google 日本語"
+      );
+      if (voices !== null && voices.length > 0) {
+        if (voiceIndex == -1) voiceIndex = 0;
+        utterance.voice = voices[voiceIndex];
+        hasVoice.value = true;
+      }
 
-    if (voices == null) {
-      utterance.voice = speechSynthesis.getVoices();
-    } else {
-      utterance.voice = voices;
+      // 設定語言為日文
+      utterance.lang = "ja-JP";
+
+      // 設定速度為較慢，可調整這個值
+      utterance.rate = 0.8;
+
+      // 設定音量為較大，可調整這個值
+      utterance.volume = 1;
     }
-
-    // 設定語言為日文
-    utterance.lang = "ja-JP";
-
-    // 設定速度為較慢，可調整這個值
-    utterance.rate = 0.8;
-
-    // 設定音量為較大，可調整這個值
-    utterance.volume = 1;
+  } catch (error) {
+    alert(error);
+  } finally {
     setTimeout(() => {
       isSpeakerLoading.value = false;
     }, 500);
@@ -145,11 +155,13 @@ async function getVoices() {
   return new Promise((resolve, reject) => {
     const voices = speechSynthesis.getVoices();
     if (voices.length > 0) {
-      resolve(voices);
+      resolve(voices.filter((e) => e.lang == "ja-JP"));
     } else {
       speechSynthesis.onvoiceschanged = () => {
         const updatedVoices = speechSynthesis.getVoices();
-        resolve(updatedVoices);
+        if (updatedVoices.length > 0) {
+          resolve(updatedVoices.filter((e) => e.lang == "ja-JP"));
+        }
       };
     }
   });
@@ -168,11 +180,7 @@ function updatePage() {
 
 function speakWord(wordToSpeak) {
   // 使用 Web Speech API
-  if ("speechSynthesis" in window) {
-    utterance.text = wordToSpeak;
-    speaker.speak(utterance);
-  } else {
-    alert("抱歉，您的瀏覽器不支援語音合成功能。");
-  }
+  utterance.text = wordToSpeak;
+  speaker.speak(utterance);
 }
 </script>
